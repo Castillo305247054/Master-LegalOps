@@ -1,6 +1,6 @@
 // Configuración del Repositorio de GitHub
-const PARTE_1 = 'ghp_5vYMKqzez6aIo781y'; 
-const PARTE_2 = 'ERAy9YWXXyfSg4264ST';
+const PARTE_1 = 'ghp_Mtl3kY1t0J9KRlaAos'; 
+const PARTE_2 = '3iqB5iQZzPha2pjh14';
 const GITHUB_TOKEN = PARTE_1 + PARTE_2;
 
 const REPO_OWNER = 'Castillo305247054';
