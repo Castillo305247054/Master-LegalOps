@@ -24,5 +24,18 @@
     "montoReclamado": "0",
     "juzgado": "kjh",
     "actoReclamado": "kjh"
+  },
+  {
+    "id": 1785647684690,
+    "fechaRegistro": "2026-08-02T05:14:44.690Z",
+    "demandante": "jhhjhj",
+    "demandado": "h",
+    "terceroInteresado": "h",
+    "materia": "Administrativo",
+    "ciudad": "hj",
+    "circuito": "h",
+    "montoReclamado": "0",
+    "juzgado": "hj",
+    "actoReclamado": "hj"
   }
 ]
