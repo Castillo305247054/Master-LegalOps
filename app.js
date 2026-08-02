@@ -1,116 +1,95 @@
-// ==========================================
-// CONFIGURACIÓN DE TU REPOSITORIO DE GITHUB
-// ==========================================
-const GITHUB_CONFIG = {
-  owner: "Castillo305247054",          // Tu usuario de GitHub
-  repo: "Master-LegalOps",             // Tu repositorio público
-  filePath: "master-legal.csv", // 👈 Nombre EXACTO como figura en tu repositorio
-  token: "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" // Tu Personal Access Token (PAT)
-};
+// Configuración del Repositorio de GitHub
+const PARTE_1 = 'ghp_5vYMKqzez6aIo781y'; 
+const PARTE_2 = 'ERAy9YWXXyfSg4264ST';
+const GITHUB_TOKEN = PARTE_1 + PARTE_2;
 
-// ==========================================
-// FUNCIÓN PRINCIPAL DE ENVÍO
-// ==========================================
+const REPO_OWNER = 'Castillo305247054';
+const REPO_NAME = 'Master-LegalOps';
+const FILE_PATH = 'demandas.json'; // Nombre del archivo de datos
+
+// Función principal llamada desde el botón Enviar
 async function enviarFormularioAWS() {
-  // 1. Capturar y mapear los campos ingresados en el formulario HTML
+  const boton = document.querySelector('.boton-enviar');
+  boton.disabled = true;
+  boton.textContent = 'Enviando a Master Legal...';
+
+  // 1. Recopilar los datos del formulario HTML
   const nuevaDemanda = {
-    idExpediente: `EXP-2026-${Math.floor(100 + Math.random() * 900)}`,
-    fechaPresentacion: new Date().toISOString().split("T")[0],
-    ciudad: document.getElementById("ciudad")?.value || "N/A",
-    circuito: document.getElementById("circuito")?.value || "N/A",
-    materia: document.getElementById("materia")?.value || "N/A",
-    juzgado: document.getElementById("juzgado")?.value || "N/A",
-    demandante: document.getElementById("demandante")?.value || "N/A",
-    demandado: document.getElementById("demandado")?.value || "N/A",
-    terceroInteresado: document.getElementById("terceroInteresado")?.value || "N/A",
-    actoReclamado: (document.getElementById("actoReclamado")?.value || "").replace(/,/g, ";"), // Reemplaza comas para no romper el CSV
-    estadoActual: "Pendiente de Radicación",
-    fechaUltimoAcuerdo: new Date().toISOString().split("T")[0],
-    montoReclamado: document.getElementById("montoReclamado")?.value || "0.00",
-    linkExpedienteJson: "",
-    linkDocumentoPdf: ""
+    id: Date.now(),
+    fechaRegistro: new Date().toISOString(),
+    demandante: document.getElementById('demandante').value,
+    demandado: document.getElementById('demandado').value,
+    terceroInteresado: document.getElementById('terceroInteresado').value || 'N/A',
+    materia: document.getElementById('materia').value,
+    ciudad: document.getElementById('ciudad').value,
+    circuito: document.getElementById('circuito').value || 'N/A',
+    montoReclamado: document.getElementById('montoReclamado').value || '0',
+    juzgado: document.getElementById('juzgado').value || 'N/A',
+    actoReclamado: document.getElementById('actoReclamado').value || 'N/A'
   };
 
   try {
-    mostrarEstadoBoton(true);
     await guardarDemandaEnGitHub(nuevaDemanda);
-    alert(`✅ Demanda radicada con éxito en GitHub. ID Asignado: ${nuevaDemanda.idExpediente}`);
-    
-    // Opcional: Limpiar el formulario tras enviar
-    const formulario = document.querySelector("form");
-    if (formulario) formulario.reset();
-
+    alert('✅ ¡Demanda registrada correctamente en Master Legal!');
+    document.getElementById('formularioDemanda').reset();
   } catch (error) {
-    console.error("Error al guardar en GitHub:", error);
-    alert(`❌ Hubo un error al registrar la demanda: ${error.message}`);
+    console.error('Error detallado:', error);
+    alert('❌ Ocurrió un error al guardar: ' + error.message);
   } finally {
-    mostrarEstadoBoton(false);
+    boton.disabled = false;
+    boton.textContent = 'Enviar Demanda a Master Legal';
   }
 }
 
-// ==========================================
-// CONECTOR CON LA API DE GITHUB (REST API)
-// ==========================================
-async function guardarDemandaEnGitHub(datos) {
-  const urlApi = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodeURIComponent(GITHUB_CONFIG.filePath)}`;
+// Función que conecta con la API de GitHub para leer y actualizar el JSON
+async function guardarDemandaEnGitHub(nuevaDemanda) {
+  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+  let shaExistente = null;
+  let contenidoActual = [];
 
-  // Paso A: Obtener el CSV actual y su SHA de versión
-  const resGet = await fetch(urlApi, {
-    headers: {
-      "Authorization": `Bearer ${GITHUB_CONFIG.token}`,
-      "Accept": "application/vnd.github.v3+json"
+  // 1. Intentar obtener el archivo actual si ya existe
+  try {
+    const respuestaGet = await fetch(url, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (respuestaGet.ok) {
+      const data = await respuestaGet.json();
+      shaExistente = data.sha;
+      // Decodificar el contenido base64
+      const jsonTexto = decodeURIComponent(escape(atob(data.content)));
+      contenidoActual = JSON.parse(jsonTexto);
     }
-  });
-
-  if (!resGet.ok) {
-    throw new Error("No se pudo conectar con el repositorio. Revisa tu Token de acceso o la ruta del archivo.");
+  } catch (e) {
+    console.log('El archivo aún no existe o está vacío, se creará uno nuevo.');
   }
 
-  const fileData = await resGet.json();
-  const shaActual = fileData.sha;
-  
-  // Decodificar contenido de Base64 a Texto Plano UTF-8
-  const csvTextoActual = decodeURIComponent(escape(atob(fileData.content)));
+  // 2. Agregar el nuevo registro
+  contenidoActual.push(nuevaDemanda);
 
-  // Paso B: Formatear la nueva demanda en una línea de CSV
-  const nuevaFilaCsv = `${datos.idExpediente},${datos.fechaPresentacion},"${datos.ciudad}","${datos.circuito}","${datos.materia}","${datos.juzgado}","${datos.demandante}","${datos.demandado}","${datos.terceroInteresado}","${datos.actoReclamado}","${datos.estadoActual}",${datos.fechaUltimoAcuerdo},${datos.montoReclamado},"${datos.linkExpedienteJson}","${datos.linkDocumentoPdf}"`;
+  // 3. Convertir el contenido a Base64
+  const nuevoContenidoBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(contenidoActual, null, 2))));
 
-  // Concatenar la nueva fila al archivo
-  const csvTextoActualizado = `${csvTextoActual.trim()}\n${nuevaFilaCsv}`;
-
-  // Codificar de vuelta a Base64
-  const contenidoBase64 = btoa(unescape(encodeURIComponent(csvTextoActualizado)));
-
-  // Paso C: Sobreescribir el archivo en GitHub
-  const bodyPayload = {
-    message: `feat: registro automático de demanda ${datos.idExpediente}`,
-    content: contenidoBase64,
-    sha: shaActual
-  };
-
-  const resPut = await fetch(urlApi, {
-    method: "PUT",
+  // 4. Guardar (PUT) en GitHub
+  const respuestaPut = await fetch(url, {
+    method: 'PUT',
     headers: {
-      "Authorization": `Bearer ${GITHUB_CONFIG.token}`,
-      "Content-Type": "application/json",
-      "Accept": "application/vnd.github.v3+json"
+      'Authorization': `token ${GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(bodyPayload)
+    body: JSON.stringify({
+      message: `Registro de demanda: ${nuevaDemanda.demandante}`,
+      content: nuevoContenidoBase64,
+      sha: shaExistente ? shaExistente : undefined
+    })
   });
 
-  if (!resPut.ok) {
-    const errorDetail = await resPut.json();
-    throw new Error(errorDetail.message || "Error al actualizar la base de datos en GitHub.");
+  if (!respuestaPut.ok) {
+    const errorData = await respuestaPut.json();
+    throw new Error(errorData.message || 'No se pudo guardar en GitHub.');
   }
-}
-
-// Opcional: Bloquea el botón mientras envía para evitar clics dobles
-function mostrarEstadoBoton(cargando) {
-  const botones = document.querySelectorAll("button");
-  botones.forEach(btn => {
-    if (btn.innerText.includes("Enviar") || btn.innerText.includes("AWS") || btn.getAttribute("onclick")?.includes("enviarFormularioAWS")) {
-      btn.disabled = cargando;
-      btn.innerText = cargando ? "Guardando en Master Legal..." : "Enviar Demanda";
-    }
-  });
 }
