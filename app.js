@@ -45,9 +45,9 @@ async function enviarFormularioAWS() {
 async function guardarDemandaEnGitHub(nuevaDemanda) {
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
   let shaExistente = null;
-  let contenidoActual = [];
+  let contenidoCSV = "Fecha,Demandante,Demandado,Tercero,Materia,Ciudad,Circuito,Monto,Juzgado,Acto\n";
 
-  // 1. Intentar obtener el archivo actual si ya existe
+  // 1. Obtener el archivo CSV actual si existe
   try {
     const respuestaGet = await fetch(url, {
       headers: {
@@ -59,21 +59,21 @@ async function guardarDemandaEnGitHub(nuevaDemanda) {
     if (respuestaGet.ok) {
       const data = await respuestaGet.json();
       shaExistente = data.sha;
-      // Decodificar el contenido base64
-      const jsonTexto = decodeURIComponent(escape(atob(data.content)));
-      contenidoActual = JSON.parse(jsonTexto);
+      // Decodificar Base64 a texto UTF-8
+      contenidoCSV = decodeURIComponent(escape(atob(data.content)));
     }
   } catch (e) {
-    console.log('El archivo aún no existe o está vacío, se creará uno nuevo.');
+    console.log('Creando nuevo archivo CSV...');
   }
 
-  // 2. Agregar el nuevo registro
-  contenidoActual.push(nuevaDemanda);
+  // 2. Crear la nueva fila en formato CSV
+  const nuevaFila = `"${nuevaDemanda.fechaRegistro}","${nuevaDemanda.demandante}","${nuevaDemanda.demandado}","${nuevaDemanda.terceroInteresado}","${nuevaDemanda.materia}","${nuevaDemanda.ciudad}","${nuevaDemanda.circuito}","${nuevaDemanda.montoReclamado}","${nuevaDemanda.juzgado}","${nuevaDemanda.actoReclamado}"\n`;
+  
+  contenidoCSV += nuevaFila;
 
-  // 3. Convertir el contenido a Base64
-  const nuevoContenidoBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(contenidoActual, null, 2))));
+  // 3. Convertir a Base64 y guardar en GitHub
+  const nuevoContenidoBase64 = btoa(unescape(encodeURIComponent(contenidoCSV)));
 
-  // 4. Guardar (PUT) en GitHub
   const respuestaPut = await fetch(url, {
     method: 'PUT',
     headers: {
@@ -82,14 +82,13 @@ async function guardarDemandaEnGitHub(nuevaDemanda) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      message: `Registro de demanda: ${nuevaDemanda.demandante}`,
+      message: `Registro CSV: ${nuevaDemanda.demandante}`,
       content: nuevoContenidoBase64,
       sha: shaExistente ? shaExistente : undefined
     })
   });
 
   if (!respuestaPut.ok) {
-    const errorData = await respuestaPut.json();
-    throw new Error(errorData.message || 'No se pudo guardar en GitHub.');
+    throw new Error('No se pudo actualizar el archivo CSV.');
   }
 }
