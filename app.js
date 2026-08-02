@@ -3,9 +3,9 @@
 // ==========================================
 const GITHUB_CONFIG = {
   owner: "Castillo305247054",          // Tu usuario de GitHub
-  repo: "Master-LegalOps",             // Tu repositorio privado
-  filePath: "master-legal",        // Tu base de datos CSV
-  token: "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" // Reemplaza por tu Personal Access Token (PAT)
+  repo: "Master-LegalOps",             // Tu repositorio público
+  filePath: "archivo master-legal.csv", // 👈 Nombre EXACTO como figura en tu repositorio
+  token: "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" // Tu Personal Access Token (PAT)
 };
 
 // ==========================================
@@ -52,7 +52,7 @@ async function enviarFormularioAWS() {
 // CONECTOR CON LA API DE GITHUB (REST API)
 // ==========================================
 async function guardarDemandaEnGitHub(datos) {
-  const urlApi = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.filePath}`;
+  const urlApi = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${encodeURIComponent(GITHUB_CONFIG.filePath)}`;
 
   // Paso A: Obtener el CSV actual y su SHA de versión
   const resGet = await fetch(urlApi, {
@@ -63,7 +63,7 @@ async function guardarDemandaEnGitHub(datos) {
   });
 
   if (!resGet.ok) {
-    throw new Error("No se pudo conectar con el repositorio. Revisa tu Token de acceso.");
+    throw new Error("No se pudo conectar con el repositorio. Revisa tu Token de acceso o la ruta del archivo.");
   }
 
   const fileData = await resGet.json();
