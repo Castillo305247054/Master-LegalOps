@@ -1,0 +1,2 @@
+﻿idExpediente,fechaPresentacion,ciudad,circuito,materia,juzgado,demandante,demandado,terceroInteresado,actoReclamado,estadoActual,fechaUltimoAcuerdo,montoReclamado,linkExpedienteJson,linkDocumentoPdf
+EXP-2026-001,01/08/2026,Ciudad de México,Primer Circuito,Administrativo,Juzgado Tercero de Distrito,Juan Carlos Pérez,Juez Décimo de lo Civil,N/A,Orden de lanzamiento,Admitida,01/08/2026,150000,expedientes-json/EXP-2026-001.json,documentos-pdf/EXP-2026-001.pdf
