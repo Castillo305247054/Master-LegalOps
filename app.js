@@ -4,7 +4,7 @@
 const GITHUB_CONFIG = {
   owner: "Castillo305247054",          // Tu usuario de GitHub
   repo: "Master-LegalOps",             // Tu repositorio público
-  filePath: "archivo master-legal.csv", // 👈 Nombre EXACTO como figura en tu repositorio
+  filePath: "master-legal.csv", // 👈 Nombre EXACTO como figura en tu repositorio
   token: "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" // Tu Personal Access Token (PAT)
 };
 
