@@ -6,25 +6,25 @@
   <title>Master Legal - Captura de Demandas</title>
   <style>
     :root {
-      --primary: #1e293b;
-      --accent: #2563eb;
+      --primario: #1e293b;
+      --acento: #2563eb;
       --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text: #0f172a;
-      --border: #cbd5e1;
+      --texto: #0f172a;
+      --borde: #cbd5e1;
     }
 
     body {
       font-family: system-ui, -apple-system, sans-serif;
       background-color: var(--bg);
-      color: var(--text);
+      color: var(--texto);
       margin: 0;
       padding: 20px;
       display: flex;
       justify-content: center;
     }
 
-    .container {
+    .recipiente {
       max-width: 650px;
       width: 100%;
       background: var(--card-bg);
@@ -35,12 +35,12 @@
 
     h2 {
       margin-top: 0;
-      color: var(--primary);
-      border-bottom: 2px solid var(--accent);
+      color: var(--primario);
+      border-bottom: 2px solid var(--acento);
       padding-bottom: 8px;
     }
 
-    .form-group {
+    .grupo-forma {
       margin-bottom: 18px;
     }
 
@@ -57,7 +57,7 @@
     textarea {
       width: 100%;
       padding: 10px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--borde);
       border-radius: 6px;
       box-sizing: border-box;
       font-size: 0.95rem;
@@ -65,7 +65,7 @@
 
     input:focus, select:focus, textarea:focus {
       outline: none;
-      border-color: var(--accent);
+      border-color: var(--acento);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
@@ -74,18 +74,18 @@
       min-height: 80px;
     }
 
-    .row {
+    .fila {
       display: flex;
       gap: 15px;
     }
 
-    .row .form-group {
+    .fila .grupo-forma {
       flex: 1;
     }
 
-    .btn-submit {
+    .boton-enviar {
       width: 100%;
-      background-color: var(--accent);
+      background-color: var(--acento);
       color: white;
       border: none;
       padding: 12px;
@@ -96,11 +96,11 @@
       transition: background-color 0.2s;
     }
 
-    .btn-submit:hover {
+    .boton-enviar:hover {
       background-color: #1d4ed8;
     }
 
-    .btn-submit:disabled {
+    .boton-enviar:disabled {
       background-color: #94a3b8;
       cursor: not-allowed;
     }
@@ -108,31 +108,31 @@
 </head>
 <body>
 
-  <div class="container">
-    <h2>⚖️ Registro Master Legal de Demandas</h2>
+  <div class="recipiente">
+    <h2>⚖️ Registro Maestro Legal de Demandas</h2>
     <p style="font-size: 0.85rem; color: #64748b;">Ingresa la información clave de la demanda para sincronizar automáticamente con el archivo Master de GitHub y tus tableros en Power BI.</p>
     
-    <form id="formDemanda" onsubmit="event.preventDefault(); enviarFormularioAWS();">
+    <form id="formularioDemanda" onsubmit="event.preventDefault(); enviarFormularioAWS();">
       
       <!-- Fila 1: Partes involucradas -->
-      <div class="form-group">
+      <div class="grupo-forma">
         <label for="demandante">Quejoso / Demandante *</label>
         <input type="text" id="demandante" placeholder="Ej. Juan Carlos Pérez López" required />
       </div>
 
-      <div class="form-group">
+      <div class="grupo-forma">
         <label for="demandado">Autoridad Responsable / Demandado *</label>
         <input type="text" id="demandado" placeholder="Ej. Juez Décimo de lo Civil de la CDMX" required />
       </div>
 
-      <div class="form-group">
+      <div class="grupo-forma">
         <label for="terceroInteresado">Tercero Interesado / Afectado</label>
-        <input type="text" id="terceroInteresado" placeholder="Ej. Inmobiliaria del Centro S.A. de C.V." />
+        <input type="text" id="terceroInteresado" placeholder="Ej. Inmobiliaria del Centro SA de CV" />
       </div>
 
       <!-- Fila 2: Materia y Ciudad -->
-      <div class="row">
-        <div class="form-group">
+      <div class="fila">
+        <div class="grupo-forma">
           <label for="materia">Materia *</label>
           <select id="materia" required>
             <option value="Administrativo">Administrativo</option>
@@ -143,37 +143,37 @@
           </select>
         </div>
 
-        <div class="form-group">
+        <div class="grupo-forma">
           <label for="ciudad">Ciudad / Sede *</label>
           <input type="text" id="ciudad" placeholder="Ej. Ciudad de México" required />
         </div>
       </div>
 
       <!-- Fila 3: Circuito y Juzgado -->
-      <div class="row">
-        <div class="form-group">
+      <div class="fila">
+        <div class="grupo-forma">
           <label for="circuito">Circuito Judicial</label>
           <input type="text" id="circuito" placeholder="Ej. Primer Circuito" />
         </div>
 
-        <div class="form-group">
+        <div class="grupo-forma">
           <label for="montoReclamado">Monto Reclamado ($)</label>
           <input type="number" id="montoReclamado" placeholder="0.00" step="0.01" />
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="grupo-forma">
         <label for="juzgado">Juzgado de Distrito / Órgano Jurisdiccional</label>
         <input type="text" id="juzgado" placeholder="Ej. Juzgado Tercero de Distrito en Materia Administrativa" />
       </div>
 
       <!-- Fila 4: Acto Reclamado -->
-      <div class="form-group">
+      <div class="grupo-forma">
         <label for="actoReclamado">Síntesis del Acto Reclamado</label>
         <textarea id="actoReclamado" placeholder="Describe brevemente la omisión o acto que se reclama..."></textarea>
       </div>
 
-      <button type="submit" class="btn-submit">Enviar Demanda a Master Legal</button>
+      <button type="submit" class="boton-enviar">Enviar Demanda a Master Legal</button>
     </form>
   </div>
 
